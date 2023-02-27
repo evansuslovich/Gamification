@@ -1,40 +1,62 @@
-const express = require("express")
-const router = express.Router() 
+const express = require('express')
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+const jwt = require("jsonwebtoken");
 
-const Users = require("../models/Users");
 
-app.post("/register", async (req, res) => {
+const { Users } = require("../models")
+
+const config = process.env;
+
+
+router.post("/register", async (req, res) => {
 
   // Our register logic starts here
   try {
     // Get user input
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, username, password1, password2, reason } = req.body;
 
     // Validate user input
-    if (!(email && password && firstName && lastName)) {
-      res.status(400).send("All input is required");
+    if (!(firstName && lastName && email && username && password1 && password2 && reason)) {
+      return res.status(400).send("Input Empty");
+    }
+
+    if (password1 != password2) {
+      return res.status(400).send("Passwords do not match!")
     }
 
     // check if user already exist
-    // Validate if user exist in our database
-    const oldUser = await Users.findOne({ email });
+    const oldUser = await Users.findOne({
+      where: (
+        {
+          email: email
+        }, 
+        {
+          username: username
+        }
+      )
+    });
 
     if (oldUser) {
-      return res.status(409).send("User Already Exist. Please Login");
+      return res.status(409).send("Username or email are already taken. Try logging in!");
     }
 
     //Encrypt user password
-    encryptedUserPassword = await bcrypt.hash(password, 10);
+    encryptedUserPassword = await bcrypt.hash(password1, 10);
+
 
     // Create user in our database
     const user = await Users.create({
-      first_name: firstName,
-      last_name: lastName,
-      email: email.toLowerCase(), // sanitize
-      password: encryptedUserPassword,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      username: username,
+      password: password1,
+      reason: reason,
     });
 
     // Create token
+
     const token = jwt.sign(
       { user_id: user._id, email },
       process.env.TOKEN_KEY,
@@ -50,44 +72,14 @@ app.post("/register", async (req, res) => {
   } catch (err) {
     console.log(err);
   }
-  // Our register logic ends here
-});
-
-
-// Login
-router.post("/login", async (req, res) => {
-
-  // Our login logic starts here
-    // Get user input
-    const { email, password } = req.body;
-
-    // Validate user input
-    if (!(email && password)) {
-      res.status(400).send("All input is required");
-    }
-    // Validate if user exist in our database
-    const user = await Users.findOne({ email });
-
-    if (user && (await bcrypt.compare(password, user.password))) {
-      // Create token
-      const token = jwt.sign(
-        { user_id: user._id, email },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "5h",
-        }
-      );
-
-      // save user token
-      user.token = token;
-
-      // user
-      return res.status(200).json(user);
-    }
-    return res.status(400).send("Invalid Credentials");
-
 })
 
+router.delete('/', async (req, res) => {
 
+  await Users.destroy({ where: {} })
+
+  listOfUsers = Users.findAll()
+  res.json(listOfUsers)
+});
 
 module.exports = router 
