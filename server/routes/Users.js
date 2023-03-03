@@ -24,12 +24,7 @@ router.post("/register", async (req, res) => {
     // check if user already exist
     const oldUser = await Users.findOne({
       where: (
-        {
-          email: email
-        },
-        {
-          username: username
-        }
+        { email: email }, { username: username  }
       )
     });
 
@@ -74,9 +69,6 @@ router.post("/login", async (req, res) => {
   // Get user input
   const { email, password } = req.body;
 
-  console.log(email)
-  console.log(password)
-
   // Validate user input
   if (!(email && password)) {
     res.status(400).send("All input is required");
@@ -85,11 +77,10 @@ router.post("/login", async (req, res) => {
   // Validate if user exist in our database
   const user = await Users.findOne({ where: ({ email: email }) });
 
-  console.log(user.password)
-  console.log(user.email)
+  
+  // find isEqual in string class! Future refactoring 
+  if (user != null && (password == user.password)) {
 
-
-  if (user && (await bcrypt.compare(password, user.password))) {
     // Create token
     const token = jwt.sign(
       { user_id: user._id, email },
@@ -101,11 +92,14 @@ router.post("/login", async (req, res) => {
 
     // save user token
     user.token = token;
-
-    // user
+    
+    console.log("save token")
+    
+    // return the user that has logged in
     return res.status(200).json(user);
+  } else {
+    return res.status(400).send("Invalid Credentials");
   }
-  return res.status(400).send("Invalid Credentials");
 });
 
 
@@ -116,5 +110,14 @@ router.delete('/', async (req, res) => {
   listOfUsers = Users.findAll()
   res.json(listOfUsers)
 });
+
+
+// get all of the users in the database 
+router.get('/', async (req, res) => {
+
+  listOfUsers = await Users.findAll()
+  res.json(listOfUsers)
+
+})
 
 module.exports = router 
