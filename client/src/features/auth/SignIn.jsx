@@ -1,28 +1,13 @@
-import React, { useEffect, useState } from "react"
-
-import { useGetAllUsersQuery } from "../../app/services/api/authApi";
+import React, { useState } from "react"
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../app/services/slices/authSlice";
+import { useLoginMutation } from "../../app/services/api/authApi";
 
 export default function SignIn() {
 
   const [account, setAccount] = useState({});
-
-  const users = useGetAllUsersQuery();
-  const [user, setUsers] = useState(users)
-
-
-  useEffect(() => {
-
-    // declare the data fetching function
-    const fetchData = async () => {
-      const data = await users;
-    }
-
-    // call the function
-    fetchData()
-      // make sure to catch any error
-      .catch(console.error);
-  }, [])
-
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch();
 
   const handleChange = (event) => {
     const name = event.target.name;
@@ -30,10 +15,19 @@ export default function SignIn() {
     setAccount(values => ({ ...values, [name]: value }))
   }
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log(users)
+  const handleSubmit = async () => {
 
+     try {
+      const user = await login(account).unwrap();
+      dispatch(setCredentials(user));
+      // navigate(from, { replace: true });
+      // enqueueSnackbar('You are now signed in', { variant: 'success' });
+      // the CSRF token changes because we've launched a new session - save the new one
+      // saveCsrfToken();
+    } catch (err) {
+      console.log(err)
+      // enqueueSnackbar('Login failed', { variant: 'error' });
+    }
   }
 
   return (
