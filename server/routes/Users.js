@@ -115,6 +115,8 @@ router.delete('/', async (req, res) => {
 // get all of the users in the database 
 router.get('/', async (req, res) => {
 
+  console.log("getting all users")
+
   listOfUsers = await Users.findAll()
   res.json(listOfUsers)
 
