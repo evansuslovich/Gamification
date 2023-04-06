@@ -4,8 +4,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 
 const { Users } = require("../models")
+const auth = require ("../middleware/auth")
 
-router.post("/register", async (req, res) => {
+router.post("/register",  async (req, res) => {
 
   // Our register logic starts here
   try {
@@ -41,12 +42,11 @@ router.post("/register", async (req, res) => {
       lastName: lastName,
       email: email,
       username: username,
-      password: password1,
+      password: encryptedUserPassword,
       reason: reason,
     });
 
     // Create token
-
     const token = jwt.sign(
       { user_id: user._id, email },
       process.env.TOKEN_KEY,
@@ -54,11 +54,14 @@ router.post("/register", async (req, res) => {
         expiresIn: "5h",
       }
     );
+
     // save user token
     user.token = token;
 
+    console.log("user created")
+
     // return new user
-    res.status(201).json(user);
+    return res.status(201).json(user);
   } catch (err) {
     console.log(err);
   }
@@ -68,19 +71,19 @@ router.post("/login", async (req, res) => {
 
   // Get user input
   const { email, password } = req.body;
+  console.log(email)
+  console.log(password)
 
   // Validate user input
   if (!(email && password)) {
-    res.status(400).send("All input is required");
+    return res.status(400).send("All input is required");
   }
 
   // Validate if user exist in our database
   const user = await Users.findOne({ where: ({ email: email }) });
 
   
-  // find isEqual in string class! Future refactoring 
-  if (user != null && (password == user.password)) {
-
+  if (user && (await bcrypt.compare(password, user.password))) {
     // Create token
     const token = jwt.sign(
       { user_id: user._id, email },
@@ -89,7 +92,6 @@ router.post("/login", async (req, res) => {
         expiresIn: "5h",
       }
     );
-
     // save user token
     user.token = token;
     
@@ -102,6 +104,27 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
+router.get('/logout', function (req, res, next) {
+  // remove the req.user property and clear the login session
+  req.logout();
+
+  // destroy session data
+  req.session = null;
+
+  // redirect to homepage
+  res.redirect('/');
+});
+
+// get logged in user
+router.get('/profile', function (req, res) {
+  res.json({
+    isAuth: true,
+    id: req.user._id,
+    email: req.user.email,
+    name: req.user.firstname + req.user.lastname
+  })
+});
 
 router.delete('/', async (req, res) => {
 
