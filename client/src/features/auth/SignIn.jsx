@@ -15,10 +15,12 @@ export default function SignIn() {
     setAccount(values => ({ ...values, [name]: value }))
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault()
 
-     try {
+    try {
       const user = await login(account).unwrap();
+      console.log(user)
       dispatch(setCredentials(user));
       // navigate(from, { replace: true });
       // enqueueSnackbar('You are now signed in', { variant: 'success' });
@@ -34,9 +36,9 @@ export default function SignIn() {
     <form onSubmit={handleSubmit}>
       <input
         type="text"
-        name="username"
-        placeholder="Username"
-        value={account.username || ""}
+        name="email"
+        placeholder="Email"
+        value={account.email || ""}
         onChange={handleChange}
       />
       <input
