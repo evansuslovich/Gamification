@@ -6,10 +6,8 @@ export default function Header() {
 
   const auth = useSelector(selectIsLoggedIn);
 
-
   return (
-    <>
-
+    <div>
       {auth &&
         <Link to="/account"> Account </Link>
       }
@@ -19,10 +17,7 @@ export default function Header() {
           <Link to="/sign-in"> Sign In </Link>
           <Link to="/sign-up"> Sign Up </Link>
         </div>
-
       }
-      
-    </>
-
+    </div>
   )
 }
