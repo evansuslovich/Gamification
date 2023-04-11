@@ -1,35 +1,32 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+import { Provider } from 'react-redux';
 import getStore from './app/store';
-import { Provider } from 'react-redux'
+import App from './App'
+import { SnackbarProvider } from "notistack";
+
 
 import { BrowserRouter } from 'react-router-dom';
 
-// const root = ReactDOM.createRoot(document.getElementById('root'));
-
-// root.render(
-//   <Provider store={getStore()}>
-//     <BrowserRouter>
-//       <App />
-//     </BrowserRouter>
-//   </Provider>
-
-// );
 
 function Root() {
   return (
-    <Provider store={getStore()}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </Provider>
+
+    <SnackbarProvider maxSnack={3} autoHideDuration={2500}>
+      <Provider store={getStore()}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </Provider>
+    </SnackbarProvider>
+
+
   )
 }
 
 const renderApp = () => {
-  createRoot(document.getElementById('app'))
+  createRoot(document.getElementById('root'))
     .render(<Root />);
 };
 
-export default renderApp 
+export default renderApp;
