@@ -1,13 +1,19 @@
 import React, { useState } from "react"
 import { useDispatch } from "react-redux";
-import { setCredentials } from "../../app/services/slices/authSlice";
+import { setUser } from "../../app/services/slices/authSlice";
 import { useLoginMutation } from "../../app/services/api/authApi";
+import { useSnackbar } from 'notistack'
+import { useNavigate } from "react-router-dom";
 
 export default function SignIn() {
 
   const [account, setAccount] = useState({});
-  const [login, { isLoading }] = useLoginMutation();
+  const [login] = useLoginMutation();
+  const { enqueueSnackbar } = useSnackbar()
   const dispatch = useDispatch();
+  const navigate = useNavigate()
+
+
 
   const handleChange = (event) => {
     const name = event.target.name;
@@ -19,16 +25,15 @@ export default function SignIn() {
     event.preventDefault()
 
     try {
+      
       const user = await login(account).unwrap();
-      console.log(user)
-      dispatch(setCredentials(user));
-      // navigate(from, { replace: true });
-      // enqueueSnackbar('You are now signed in', { variant: 'success' });
-      // the CSRF token changes because we've launched a new session - save the new one
-      // saveCsrfToken();
+      dispatch(setUser(user));
+      localStorage.setItem('token', user.token)
+      navigate("/")
+      enqueueSnackbar('You are now signed in', { variant: 'success' });
+
     } catch (err) {
       console.log(err)
-      // enqueueSnackbar('Login failed', { variant: 'error' });
     }
   }
 
