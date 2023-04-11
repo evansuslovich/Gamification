@@ -11,7 +11,6 @@ import { BrowserRouter } from 'react-router-dom';
 
 function Root() {
   return (
-
     <SnackbarProvider maxSnack={3} autoHideDuration={2500}>
       <Provider store={getStore()}>
         <BrowserRouter>
@@ -19,8 +18,6 @@ function Root() {
         </BrowserRouter>
       </Provider>
     </SnackbarProvider>
-
-
   )
 }
 

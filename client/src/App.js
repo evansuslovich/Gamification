@@ -10,7 +10,6 @@ import SignIn from "./features/auth/SignIn";
 import SignUp from "./features/auth/SignUp";
 import Account from "./features/auth/Account";
 
-
 function App() {
 
   return (
