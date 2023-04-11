@@ -2,9 +2,13 @@ const express = require('express')
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const auth = require("../../server/middleware/auth")
+
+var csrf = require('csurf');
+const cookieParser = require('cookie-parser'); // CSRF Cookie parsing
+const bodyParser = require('body-parser'); // CSRF Body parsing
 
 const { Users } = require("../models")
-const auth = require ("../middleware/auth")
 
 router.post("/register",  async (req, res) => {
 
@@ -71,8 +75,6 @@ router.post("/login", async (req, res) => {
 
   // Get user input
   const { email, password } = req.body;
-  console.log(email)
-  console.log(password)
 
   // Validate user input
   if (!(email && password)) {
@@ -94,37 +96,48 @@ router.post("/login", async (req, res) => {
     );
     // save user token
     user.token = token;
+
+    console.log(token)
     
-    console.log("save token")
     
     // return the user that has logged in
-    return res.status(200).json(user);
+    res.status(200).json(user);
   } else {
     return res.status(400).send("Invalid Credentials");
   }
 });
 
 
+router.post("/welcome", auth, async (req, res) => {
+  const user = await Users.findOne({ where: ({ email: req.user.email }) });
+  res.status(200).json(user);
+});
+
+router.post('/profile', async function (req, res) {
+  console.log(req)
+  res.status(200).json("user");
+});
+
 router.get('/logout', function (req, res, next) {
-  // remove the req.user property and clear the login session
-  req.logout();
-
-  // destroy session data
-  req.session = null;
-
-  // redirect to homepage
-  res.redirect('/');
+  res.clearCookie() 
+  return res.redirect("/")
 });
 
-// get logged in user
-router.get('/profile', function (req, res) {
-  res.json({
-    isAuth: true,
-    id: req.user._id,
-    email: req.user.email,
-    name: req.user.firstname + req.user.lastname
-  })
-});
+
+// Middlewares
+var csrfProtect = csrf({ cookie: true })
+
+
+router.get('/form', csrfProtect, function (req, res) {
+  // Generate a tocken and send it to the view
+  res.render('send', { csrfToken: req.csrfToken() })
+})
+
+router.post('/posts/create', csrfProtect, function (req, res) {
+  res.send('data is being processed')
+})
+
+
 
 router.delete('/', async (req, res) => {
 
@@ -135,14 +148,5 @@ router.delete('/', async (req, res) => {
 });
 
 
-// get all of the users in the database 
-router.get('/', async (req, res) => {
-
-  console.log("getting all users")
-
-  listOfUsers = await Users.findAll()
-  res.json(listOfUsers)
-
-})
 
 module.exports = router 
