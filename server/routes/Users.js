@@ -108,20 +108,16 @@ router.post("/login", async (req, res) => {
 });
 
 
-router.post("/welcome", auth, async (req, res) => {
+router.get("/profile", auth, async (req, res) => {
   const user = await Users.findOne({ where: ({ email: req.user.email }) });
   res.status(200).json(user);
-});
-
-router.post('/profile', async function (req, res) {
-  console.log(req)
-  res.status(200).json("user");
 });
 
 router.get('/logout', function (req, res, next) {
   res.clearCookie() 
   return res.redirect("/")
 });
+
 
 
 // Middlewares
@@ -136,16 +132,6 @@ router.get('/form', csrfProtect, function (req, res) {
 router.post('/posts/create', csrfProtect, function (req, res) {
   res.send('data is being processed')
 })
-
-
-
-router.delete('/', async (req, res) => {
-
-  await Users.destroy({ where: {} })
-
-  listOfUsers = Users.findAll()
-  res.json(listOfUsers)
-});
 
 
 
