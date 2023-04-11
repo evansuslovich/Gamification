@@ -1,18 +1,15 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// const initialState = { isLoggedIn: false };
 
 export const authApi = createApi({
   baseQuery: fetchBaseQuery({ 
-    baseUrl: 'http://localhost:3001/users/' 
+    baseUrl: 'http://localhost:3001/users/',
+    prepareHeaders: (headers,) => {
+      headers.set('x-access-token', localStorage.getItem('token'));
+      return headers 
+    },
   }),
   endpoints: (builder) => ({
-    getAllUsers: builder.query({
-      query: () => ({
-        url: '/',
-        method: 'GET',
-      }),
-    }),
 
     logout: builder.mutation({
       query: () => ({
@@ -34,7 +31,12 @@ export const authApi = createApi({
         body: { ...credentials },
       }),
     }),
-
+    profile: builder.query({
+      query: () => ({
+        url: 'profile',
+        method: 'GET'
+      })
+    }),
   }),
 });
 
@@ -43,5 +45,6 @@ export const {
   useLogoutMutation,
   useLoginMutation, 
   useRegisterMutation,
+  useProfileQuery,
 
 } = authApi;
