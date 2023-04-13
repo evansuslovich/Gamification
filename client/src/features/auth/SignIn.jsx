@@ -8,11 +8,16 @@ import { useNavigate } from "react-router-dom";
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button'
+import Container from "@mui/material/Container";
+import Typography  from "@mui/material/Typography";
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import CssBaseline from '@mui/material/CssBaseline';
+import Avatar  from "@mui/material/Avatar";
 
 export default function SignIn() {
 
   const [account, setAccount] = useState({});
-  const [login, {isLoading}] = useLoginMutation();
+  const [login, { isLoading }] = useLoginMutation();
   const { enqueueSnackbar } = useSnackbar()
   const dispatch = useDispatch();
   const navigate = useNavigate()
@@ -25,17 +30,33 @@ export default function SignIn() {
   }
 
   return (
-    <div className="containter">
-      <div className="row">
-        <div className="col-4 offset-4">
-          
-          <h1>Login</h1>
+    <div>
+      <Container maxWidth="md">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon titleAccess="admin only" />
+
+          </Avatar>
+
+          <Typography component="h1" variant="h5">
+            Login
+          </Typography>
 
           <Box
             component="form"
-            method="post"
             noValidate
+            sx={{ mt: 3 }}
+            method="post"
           >
+
             <TextField
               margin="normal"
               required
@@ -78,10 +99,9 @@ export default function SignIn() {
             >
               Login
             </Button>
-
+            </Box>
           </Box>
-        </div>
-      </div>
-    </div>
+      </Container>
+    </div >
   )
 }
