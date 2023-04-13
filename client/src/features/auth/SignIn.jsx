@@ -24,13 +24,11 @@ export default function SignIn() {
     event.preventDefault()
 
     try {
-      
       const user = await login(account).unwrap();
       dispatch(setUser(user));
       localStorage.setItem('token', user.token)
       navigate("/")
       enqueueSnackbar('You are now signed in', { variant: 'success' });
-
     } catch (err) {
       console.log(err)
     }
