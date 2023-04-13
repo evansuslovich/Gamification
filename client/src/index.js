@@ -12,10 +12,13 @@ import { setUser } from './app/services/slices/authSlice';
 
 async function initializeApp() {
   const store = getStore();
-  const response = await store.dispatch(authApi.endpoints.profile.initiate());
-  await store.dispatch(setUser(response.data));
-  renderApp();
 
+  if (localStorage.getItem('token') !== "null" && localStorage.length === 2 ) {
+    const response = await store.dispatch(authApi.endpoints.profile.initiate());
+    await store.dispatch(setUser(response.data));
+  }
+  
+  renderApp();
 }
 
 initializeApp();
