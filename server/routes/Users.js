@@ -4,10 +4,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const auth = require("../../server/middleware/auth")
 
-var csrf = require('csurf');
-const cookieParser = require('cookie-parser'); // CSRF Cookie parsing
-const bodyParser = require('body-parser'); // CSRF Body parsing
-
 
 const { Users } = require("../models")
 
@@ -16,7 +12,6 @@ router.post("/register",  async (req, res) => {
   // Our register logic starts here
   try {
 
-    console.log(req.body)
     // Get user input
     const { firstName, lastName, email, username, password1, password2, reason } = req.body;
 
@@ -99,9 +94,10 @@ router.post("/login", async (req, res) => {
     );
     // save user token
     user.token = token;
-
     
+
     // return the user that has logged in
+    console.log("user logged in")
     res.status(200).json(user);
   } else {
     return res.status(400).send("Invalid Credentials");
@@ -110,19 +106,22 @@ router.post("/login", async (req, res) => {
 
 const invalidateTokens = []
 
-console.log(invalidateTokens)
 
 router.get("/profile", auth, async (req, res) => {
   const token = req.headers['x-access-token'];
 
+  // is the user's token invalidated? 
   if (invalidateTokens.includes(token)) {
+    console.log("invalidated profile fetch")
     return res.status(400).send("Cookie is invalidated")
-  } else {
+  } 
+  else {
+    // gets profile related to email 
+    console.log("profile fetch")
     const user = await Users.findOne({ where: ({ email: req.user.email }) });
     res.status(200).json(user);
   }
 
-  
 });
 
 
@@ -130,44 +129,35 @@ router.get("/profile", auth, async (req, res) => {
 // Define route to handle logout
 router.post("/logout", auth, (req, res) => {
   const token = req.headers['x-access-token'];
+
   if (!token) {
     return res.status(401).send('Invalid token');
   }
+
   try {
     if(!invalidateTokens.includes(token)) {
+     
       // Invalidate JWT token by setting expiration to a past date
       invalidateTokens.push(token)
-      const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+      
       const expirationDate = new Date(0);
       const invalidatedToken = jwt.sign({}, process.env.TOKEN_KEY, {
         expiresIn: expirationDate.getTime(),
       });
+      
       // Clear token from client-side by setting response header to an empty string
       res.set('x-access-token', invalidatedToken);
-      return res.status(200).send("Cookie has been removed")
-    } else {
-      return res.status(400).send("Cookie is invalidated")
+      console.log("logged out")
+      
+      return res.status(200).json("Cookie has been removed")
+    } 
+    else {
+      return res.status(400).json("Cookie is invalidated")
     }
-
-
   } catch (err) {
     console.log(err)
   }
 });
-
-
-// // Middlewares
-// var csrfProtect = csrf({ cookie: true })
-
-
-// router.get('/form', csrfProtect, function (req, res) {
-//   // Generate a tocken and send it to the view
-//   res.render('send', { csrfToken: req.csrfToken() })
-// })
-
-// router.post('/posts/create', csrfProtect, function (req, res) {
-//   res.send('data is being processed')
-// })
 
 
 
