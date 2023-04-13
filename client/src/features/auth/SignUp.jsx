@@ -44,7 +44,7 @@ export default function SignUp() {
         <CssBaseline />
         <Box
           sx={{
-            marginTop: 8,
+            marginTop: 6,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -62,7 +62,7 @@ export default function SignUp() {
           <Box
             component="form"
             noValidate
-            sx={{ mt: 3 }}
+            sx={{ mt: 2 }}
           >
 
             <Grid container spacing={2}>
