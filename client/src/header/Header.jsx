@@ -1,48 +1,34 @@
-import { Link } from "react-router-dom"
-import { selectIsLoggedIn } from "../app/services/slices/authSlice"
-import { useSelector, useDispatch } from "react-redux";
-import { useLogoutMutation } from "../app/services/api/authApi";
-import { setUser } from "../app/services/slices/authSlice";
-import { useNavigate } from "react-router-dom";
-import { useSnackbar } from 'notistack';
+import * as React from 'react';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+
+import "./header.scss"
 
 export default function Header() {
-
-  const [logout] = useLogoutMutation();
-  const auth = useSelector(selectIsLoggedIn);
-  const dispatch = useDispatch();
-  const navigate = useNavigate(); 
-  const { enqueueSnackbar } = useSnackbar();
-
   return (
-    <div>
-      {auth &&
-      <div>
-          <Link to="/account"> Account </Link>
+    <div className='header'>
+      <div className='container'>
 
-          <br />
+        <Toolbar>
 
-          <Link onClick={async () => {
-            await logout().unwrap();
-            dispatch(setUser(null));
-            localStorage.setItem('token', null)
-            navigate('/');
-            enqueueSnackbar("You've been logged out", { variant: 'info' });
-            
-          }}>
-            Logout
-          </Link>
+          <IconButton
+            size="large"
+            edge="start"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
 
-        </div>
-
-      }
-
-      {!auth &&
-        <div>
-          <Link to="/sign-in"> Sign In </Link>
-          <Link to="/sign-up"> Sign Up </Link>
-        </div>
-      }
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            News
+          </Typography>
+          <Button>Login</Button>
+        </Toolbar>
+      </div>
     </div>
-  )
+  );
 }
