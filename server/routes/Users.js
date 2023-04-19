@@ -33,7 +33,7 @@ router.post("/register",  async (req, res) => {
 
     if (oldUser) {
       return res.status(409).send("Username or email are already taken. Try logging in!");
-    }
+    } 
 
     //Encrypt user password
     encryptedUserPassword = await bcrypt.hash(password1, 10);
